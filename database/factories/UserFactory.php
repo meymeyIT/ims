@@ -24,6 +24,7 @@ class UserFactory extends Factory
         return [
             'role_id' => fn () => $this->roleId(Role::VIEWER),
             'name' => fake()->name(),
+            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->numerify('0## ### ####'),
             'email_verified_at' => now(),

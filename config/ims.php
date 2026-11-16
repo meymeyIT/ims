@@ -10,6 +10,7 @@ return [
     // If ADMIN_PASSWORD is empty, a random password is generated and printed once.
     'admin' => [
         'name' => env('ADMIN_NAME', 'System Administrator'),
+        'username' => env('ADMIN_USERNAME', 'admin'),
         'email' => env('ADMIN_EMAIL', 'admin@ims.local'),
         'password' => env('ADMIN_PASSWORD'),
     ],

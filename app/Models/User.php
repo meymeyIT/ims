@@ -18,6 +18,7 @@ class User extends Authenticatable
     protected $fillable = [
         'role_id',
         'name',
+        'username',
         'email',
         'phone',
         'password',
@@ -82,5 +83,29 @@ class User extends Authenticatable
         $this->role->loadMissing('permissions');
 
         return $this->role->hasPermission($permission);
+    }
+
+    /** True if this user is the only remaining active administrator. */
+    public function isLastActiveAdmin(): bool
+    {
+        if (! $this->is_active || ! $this->hasRole(Role::ADMIN)) {
+            return false;
+        }
+
+        return ! static::query()
+            ->whereKeyNot($this->getKey())
+            ->where('is_active', true)
+            ->whereHas('role', fn ($q) => $q->where('name', Role::ADMIN))
+            ->exists();
+    }
+
+    /** Two-letter initials for the avatar circle, e.g. "Sok Dara" -> "SD". */
+    public function initials(): string
+    {
+        $parts = preg_split('/\s+/', trim($this->name)) ?: [];
+        $first = mb_substr($parts[0] ?? '', 0, 1);
+        $last = count($parts) > 1 ? mb_substr(end($parts), 0, 1) : mb_substr($parts[0] ?? '', 1, 1);
+
+        return mb_strtoupper($first . $last);
     }
 }

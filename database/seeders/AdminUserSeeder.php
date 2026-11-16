@@ -35,12 +35,13 @@ class AdminUserSeeder extends Seeder
         User::create([
             'role_id' => Role::where('name', Role::ADMIN)->value('id'),
             'name' => config('ims.admin.name'),
+            'username' => config('ims.admin.username'),
             'email' => $email,
             'password' => $password,          // hashed automatically by the User model cast
             'is_active' => true,
         ])->forceFill(['email_verified_at' => now()])->save();
 
-        $this->command?->info("Admin account created: {$email}");
+        $this->command?->info("Admin account created: username '" . config('ims.admin.username') . "' / {$email}");
 
         if ($generated) {
             $this->command?->warn("Generated password (shown only once, save it now): {$password}");

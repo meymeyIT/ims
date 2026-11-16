@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Unit extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'abbreviation', 'description', 'is_active'];
 
     protected function casts(): array
@@ -23,6 +26,15 @@ class Unit extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(fn (Builder $q) => $q->where('name', 'like', "%{$term}%")->orWhere('abbreviation', 'like', "%{$term}%"));
     }
 
     public function isInUse(): bool

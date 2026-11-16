@@ -1,4 +1,4 @@
-# IMS Database Design (Phase 2)
+# IMS Database Design
 
 Database: MySQL 8 / MariaDB 10.4+ (InnoDB, utf8mb4). Laravel's default tables
 (`password_reset_tokens`, `sessions`, `cache`, `jobs`, ...) are not shown.
@@ -26,7 +26,8 @@ erDiagram
     purchase_receipt_items ||--o| stock_movements : "creates exactly one"
     stock_movements |o--o| stock_movements : "reversal_of"
     users ||--o{ activity_logs : "performed"
-    users ||--o{ notifications : "receives"
+    users ||--o{ notifications : "receives (morph)"
+    products ||--o{ notifications : "low_stock alert data"
 
     roles { bigint id PK
         string name UK }
@@ -35,8 +36,11 @@ erDiagram
         string module }
     users { bigint id PK
         bigint role_id FK
+        string username UK
         string email UK
+        string phone
         bool is_active
+        timestamp last_login_at
         timestamp deleted_at }
     categories { bigint id PK
         string name UK
@@ -54,6 +58,8 @@ erDiagram
         decimal average_cost
         decimal current_stock
         decimal minimum_stock
+        timestamp low_stock_alerted_at
+        bool is_active
         timestamp deleted_at }
     suppliers { bigint id PK
         string name
@@ -63,6 +69,8 @@ erDiagram
         bigint supplier_id FK
         bigint created_by FK
         string status
+        date purchase_date
+        bigint approved_by FK
         decimal total_amount }
     purchase_items { bigint id PK
         bigint purchase_id FK
@@ -84,6 +92,9 @@ erDiagram
         string movement_number UK
         bigint product_id FK
         string type
+        string reason
+        datetime movement_date
+        bigint user_id FK
         decimal quantity "signed"
         decimal previous_stock
         decimal new_stock
@@ -96,8 +107,38 @@ erDiagram
     activity_logs { bigint id PK
         bigint user_id FK
         string action
-        string module }
+        string module
+        string ip_address
+        timestamp created_at }
+    notifications { uuid id PK
+        string type "low_stock"
+        string notifiable_type
+        bigint notifiable_id
+        json data
+        timestamp read_at }
+    sequences { string name PK "e.g. PO-20261116"
+        bigint value "row-locked counter" }
 ```
+
+## Indexes added for performance (migration `2026_11_17_000015`)
+
+| Index | Used by |
+|---|---|
+| `purchases_status_date_index` (status, purchase_date) | Purchase list filters, Purchase report, dashboard purchase trend |
+| `stock_movements_reason_date_index` (reason, movement_date) | Stock Out report and history filters by reason |
+| `stock_movements_user_date_index` (user_id, movement_date) | History filtered by user |
+| `products_category_active_index` (category_id, is_active, deleted_at) | Product list, Category / Valuation reports |
+
+Each was checked with `EXPLAIN` on MySQL 8. Unique keys (SKU, barcode, document numbers)
+and foreign keys are indexed automatically.
+
+## Document numbers
+
+`sequences` holds one counter row per prefix and day (e.g. `PO-20261116`). `DocumentNumber`
+locks that row (`SELECT ... FOR UPDATE`) inside the same transaction as the document, so two
+users never get the same number, and a rolled-back transaction does not use up a number.
+Formats: `PO-YYYYMMDD-0001`, `GRN-YYYYMMDD-0001`, `SM-YYYYMMDD-000001`
+(the PO and GRN prefixes can be changed in Settings).
 
 ## Key design rules
 

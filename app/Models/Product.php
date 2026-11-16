@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * current_stock, average_cost and low_stock_alerted_at are deliberately NOT
@@ -100,7 +102,48 @@ class Product extends Model
         });
     }
 
+    /** in_stock: above minimum · low_stock: 0 < stock <= minimum · out_of_stock: 0 */
+    public function scopeStockStatus(Builder $query, ?string $status): Builder
+    {
+        return match ($status) {
+            'out_of_stock' => $query->where('current_stock', '<=', 0),
+            'low_stock' => $query->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'minimum_stock'),
+            'in_stock' => $query->whereColumn('current_stock', '>', 'minimum_stock'),
+            default => $query,
+        };
+    }
+
     // ---------------------------------------------------------------- helpers
+
+    public function stockStatus(): string
+    {
+        if (bccomp((string) $this->current_stock, '0', 3) <= 0) {
+            return 'out_of_stock';
+        }
+
+        return $this->isLowStock() ? 'low_stock' : 'in_stock';
+    }
+
+    /**
+     * Suggested order quantity for a low product: enough to reach TWICE the minimum stock
+     * (simple rule; documented in the README). Null when no minimum is set.
+     */
+    public function suggestedRestockQuantity(): ?string
+    {
+        if (bccomp((string) $this->minimum_stock, '0', 3) <= 0) {
+            return null;
+        }
+
+        $target = bcmul((string) $this->minimum_stock, '2', 3);
+        $needed = bcsub($target, (string) $this->current_stock, 3);
+
+        return bccomp($needed, '0', 3) > 0 ? $needed : null;
+    }
+
+    public function imageUrl(): ?string
+    {
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
 
     public function isLowStock(): bool
     {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PurchaseStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -75,5 +76,20 @@ class Purchase extends Model
     public function receipts(): HasMany
     {
         return $this->hasMany(PurchaseReceipt::class);
+    }
+
+    /** Search by purchase number or supplier name / company. */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            $q->where('purchase_number', 'like', "%{$term}%")
+                ->orWhereHas('supplier', fn (Builder $s) => $s->withTrashed()->where(
+                    fn (Builder $w) => $w->where('name', 'like', "%{$term}%")->orWhere('company_name', 'like', "%{$term}%")
+                ));
+        });
     }
 }
