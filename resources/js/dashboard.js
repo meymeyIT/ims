@@ -13,14 +13,30 @@ import {
 
 Chart.register(BarController, BarElement, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const COLORS = {
-    blue: '#2a78d6',
-    orange: '#eb6834',
-    critical: '#e34948',
-    warning: '#eda100',
-    text: '#52514e',
-    grid: 'rgba(17, 24, 39, 0.06)',
+// Light and dark values are separate, validated steps of the same hues (not an automatic flip).
+const PALETTES = {
+    light: {
+        blue: '#2a78d6',
+        orange: '#eb6834',
+        critical: '#e34948',
+        warning: '#eda100',
+        text: '#52514e',
+        grid: 'rgba(17, 24, 39, 0.06)',
+        surface: '#ffffff',
+    },
+    dark: {
+        blue: '#3987e5',
+        orange: '#d95926',
+        critical: '#d03b3b',
+        warning: '#fab219',
+        text: '#c3c2b7',
+        grid: 'rgba(255, 255, 255, 0.08)',
+        surface: '#1c1c1b',
+    },
 };
+
+const themeNow = () => (document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light');
+let COLORS = PALETTES[themeNow()];
 
 const data = JSON.parse(document.getElementById('dashboard-data')?.textContent || '{}');
 const number = (value, digits = 3) => Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
@@ -42,7 +58,7 @@ Chart.defaults.plugins.legend.labels.borderRadius = 3;
 
 const valueAxis = (extra = {}) => ({
     beginAtZero: true,
-    grid: { color: COLORS.grid, drawTicks: false },
+    grid: { color: () => COLORS.grid, drawTicks: false },
     border: { display: false },
     ticks: { padding: 8, precision: 0 },
     ...extra,
@@ -62,10 +78,18 @@ const bar = (extra = {}) => ({
 });
 const truncate = (label, max = 28) => (label.length > max ? `${label.slice(0, max - 1)}…` : label);
 
+/*
+ * Colours are given as functions (Chart.js "scriptable options"), so a theme switch
+ * only has to swap COLORS and redraw: see the ims:themechange listener at the bottom.
+ */
+const color = (name) => () => COLORS[name];
+
+const charts = [];
+
 function draw(id, config) {
     const canvas = document.getElementById(id);
     if (canvas) {
-        new Chart(canvas, config);
+        charts.push(new Chart(canvas, config));
     }
 }
 
@@ -76,8 +100,8 @@ if (data.stockFlow) {
         data: {
             labels: data.stockFlow.labels,
             datasets: [
-                { label: 'Stock in', data: data.stockFlow.in, backgroundColor: COLORS.blue, ...bar() },
-                { label: 'Stock out', data: data.stockFlow.out, backgroundColor: COLORS.orange, ...bar() },
+                { label: 'Stock in', data: data.stockFlow.in, backgroundColor: color('blue'), ...bar() },
+                { label: 'Stock out', data: data.stockFlow.out, backgroundColor: color('orange'), ...bar() },
             ],
         },
         options: {
@@ -94,7 +118,7 @@ if (data.categories) {
         type: 'bar',
         data: {
             labels: data.categories.labels.map((l) => truncate(l)),
-            datasets: [{ label: 'Products', data: data.categories.counts, backgroundColor: COLORS.blue, ...bar() }],
+            datasets: [{ label: 'Products', data: data.categories.counts, backgroundColor: color('blue'), ...bar() }],
         },
         options: {
             indexAxis: 'y',
@@ -116,12 +140,12 @@ if (data.purchases) {
             datasets: [{
                 label: 'Purchases',
                 data: data.purchases.totals,
-                borderColor: COLORS.blue,
-                backgroundColor: COLORS.blue,
+                borderColor: color('blue'),
+                backgroundColor: color('blue'),
                 borderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointBorderColor: '#fff',
+                pointBorderColor: color('surface'),
                 pointBorderWidth: 2,
                 tension: 0.25,
             }],
@@ -148,7 +172,7 @@ if (data.topProducts) {
         type: 'bar',
         data: {
             labels: data.topProducts.labels.map((l) => truncate(l, 34)),
-            datasets: [{ label: 'Stock-out transactions', data: data.topProducts.transactions, backgroundColor: COLORS.blue, ...bar() }],
+            datasets: [{ label: 'Stock-out transactions', data: data.topProducts.transactions, backgroundColor: color('blue'), ...bar() }],
         },
         options: {
             indexAxis: 'y',
@@ -176,7 +200,7 @@ if (data.lowStock) {
             datasets: [{
                 label: '% of minimum',
                 data: data.lowStock.percent,
-                backgroundColor: data.lowStock.out.map((isOut) => (isOut ? COLORS.critical : COLORS.warning)),
+                backgroundColor: (ctx) => (data.lowStock.out[ctx.dataIndex] ? COLORS.critical : COLORS.warning),
                 minBarLength: 4,   // out-of-stock (0%) stays visible
                 ...bar(),
             }],
@@ -200,3 +224,10 @@ if (data.lowStock) {
         },
     });
 }
+
+// Light / dark toggle (resources/js/theme.js): swap the palette and redraw every chart.
+window.addEventListener('ims:themechange', (event) => {
+    COLORS = PALETTES[event.detail.theme] || PALETTES.light;
+    Chart.defaults.color = COLORS.text;
+    charts.forEach((chart) => chart.update('none'));
+});

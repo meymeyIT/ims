@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @include('partials.theme-script')
     <title>@yield('title', 'Sign in') · {{ $businessName }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -12,6 +13,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="auth-body">
+<button class="btn btn-light theme-toggle-floating" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Switch to dark mode">
+    <i class="bi bi-moon-stars fs-5"></i>
+</button>
 <div class="auth-wrapper">
     <div class="auth-card card">
         <div class="card-body p-4 p-sm-5">

@@ -2,6 +2,7 @@ import './bootstrap'; // Laravel's axios setup (sends the CSRF token with AJAX r
 import * as bootstrap from 'bootstrap';
 import Swal from 'sweetalert2';
 import './purchase-form';
+import './theme';
 
 // Chart.js is downloaded only on the dashboard (separate file, keeps other pages light).
 if (document.getElementById('dashboard-charts')) {

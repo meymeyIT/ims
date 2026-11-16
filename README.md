@@ -45,6 +45,7 @@ Further documentation: [`docs/DATABASE.md`](docs/DATABASE.md) (ERD and schema ru
 - **Reports**: 10 reports with date / product / category / supplier / status filters, pagination, totals, **Excel**, **PDF** and **print**.
 - **Inventory valuation**: weighted average cost.
 - **Activity logs**: who did what, when and from which IP address (including failed sign-ins).
+- **Light / dark mode**: toggle button in the top bar and on the sign-in page; the choice is remembered per browser, and charts switch colours too.
 - **System settings**: business name, logo, address, phone, email, currency (USD / KHR), exchange rate, date format, notification options, document number prefixes.
 
 ## Technology stack

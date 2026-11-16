@@ -10,6 +10,11 @@
     </button>
 
     <div class="ms-auto d-flex align-items-center gap-2">
+        {{-- Light / dark mode --}}
+        <button class="btn btn-light" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Switch to dark mode">
+            <i class="bi bi-moon-stars fs-5"></i>
+        </button>
+
         {{-- Notification bell --}}
         <div class="dropdown">
             <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">

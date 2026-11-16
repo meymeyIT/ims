@@ -9,14 +9,52 @@
     --ims-sidebar-width: 260px;
     --ims-topbar-height: 64px;
     --ims-radius: 0.75rem;
-    --ims-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
-
     --bs-font-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bs-border-radius: 0.5rem;
+    --bs-border-radius-lg: var(--ims-radius);
+}
+
+/* ---------- Colour themes (toggle in the top bar; see resources/js/theme.js) ----------
+   Every colour the app uses comes from these variables, so the two blocks below are
+   the only place light and dark differ. Bootstrap switches its own components when
+   <html data-bs-theme="dark"> is set. */
+
+:root,
+[data-bs-theme=light] {
     --bs-body-bg: #f5f7fb;
     --bs-body-color: #1f2937;
     --bs-border-color: #e5e7eb;
-    --bs-border-radius: 0.5rem;
-    --bs-border-radius-lg: var(--ims-radius);
+    --ims-surface: #ffffff;          /* cards, sidebar, top bar, footer */
+    --ims-surface-soft: #f9fafb;     /* image boxes, subtle fills */
+    --ims-hover: #f3f4f6;
+    --ims-muted: #6b7280;            /* table headings, stat labels */
+    --ims-faint: #9ca3af;            /* sidebar section titles, placeholders */
+    --ims-nav-color: #4b5563;
+    --ims-topbar-bg: rgba(255, 255, 255, 0.92);
+    --ims-auth-glow: #e0ecff;
+    --ims-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+    --ims-shadow-hover: 0 4px 12px rgba(16, 24, 40, 0.08);
+}
+
+[data-bs-theme=dark] {
+    --bs-body-bg: #141413;
+    --bs-body-color: #e8e7e3;
+    --bs-emphasis-color: #ffffff;
+    --bs-secondary-color: rgba(232, 231, 227, 0.68);
+    --bs-tertiary-color: rgba(232, 231, 227, 0.45);
+    --bs-secondary-bg: #262624;
+    --bs-tertiary-bg: #1f1f1d;
+    --bs-border-color: #2f2f2c;
+    --ims-surface: #1c1c1b;
+    --ims-surface-soft: #232321;
+    --ims-hover: #2a2a28;
+    --ims-muted: #a3a29c;
+    --ims-faint: #898781;
+    --ims-nav-color: #c3c2b7;
+    --ims-topbar-bg: rgba(28, 28, 27, 0.92);
+    --ims-auth-glow: #1b2433;
+    --ims-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --ims-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -53,14 +91,14 @@ body {
     font-size: 0.8125rem;
     color: var(--bs-secondary-color);
     border-top: 1px solid var(--bs-border-color);
-    background: #fff;
+    background: var(--ims-surface);
 }
 
 /* ---------- Sidebar ---------- */
 
 .app-sidebar {
     --bs-offcanvas-width: var(--ims-sidebar-width);
-    background: #fff;
+    background: var(--ims-surface);
     border-right: 1px solid var(--bs-border-color);
 }
 
@@ -118,7 +156,7 @@ body {
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: var(--ims-faint);
 }
 
 .sidebar-nav .nav-link {
@@ -128,14 +166,14 @@ body {
     padding: 0.5rem 0.75rem;
     margin-bottom: 2px;
     border-radius: 0.5rem;
-    color: #4b5563;
+    color: var(--ims-nav-color);
     font-weight: 500;
 }
 
 .sidebar-nav .nav-link i { font-size: 1.05rem; }
 
 .sidebar-nav .nav-link:hover {
-    background: #f3f4f6;
+    background: var(--ims-hover);
     color: var(--bs-body-color);
 }
 
@@ -160,7 +198,7 @@ body {
     gap: 0.75rem;
     height: var(--ims-topbar-height);
     padding: 0 1.25rem;
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--ims-topbar-bg);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--bs-border-color);
 }
@@ -174,7 +212,7 @@ body {
     border-color: transparent;
 }
 
-.app-topbar .btn-light:hover { background: #f3f4f6; }
+.app-topbar .btn-light:hover { background: var(--ims-hover); }
 
 .notification-menu { width: 320px; max-width: 90vw; }
 
@@ -215,6 +253,8 @@ body {
 /* ---------- Cards & tables ---------- */
 
 .card {
+    --bs-card-bg: var(--ims-surface);
+    --bs-card-cap-bg: var(--ims-surface);
     border-color: var(--bs-border-color);
     border-radius: var(--ims-radius);
     box-shadow: var(--ims-shadow);
@@ -236,7 +276,7 @@ body {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #6b7280;
+    color: var(--ims-muted);
     white-space: nowrap;
 }
 
@@ -259,7 +299,7 @@ body {
 
 .stat-label {
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: var(--ims-muted);
 }
 
 .stat-value {
@@ -276,7 +316,7 @@ body {
 /* ---------- Auth pages ---------- */
 
 .auth-body {
-    background: radial-gradient(circle at top, #e0ecff 0%, var(--bs-body-bg) 55%);
+    background: radial-gradient(circle at top, var(--ims-auth-glow) 0%, var(--bs-body-bg) 55%);
 }
 
 .auth-wrapper {
@@ -301,15 +341,15 @@ body {
     object-fit: cover;
     border-radius: 0.5rem;
     border: 1px solid var(--bs-border-color);
-    background: #fff;
+    background: var(--ims-surface);
 }
 
 .product-thumb-empty {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
-    background: #f3f4f6;
+    color: var(--ims-faint);
+    background: var(--ims-hover);
 }
 
 .image-preview {
@@ -323,7 +363,7 @@ body {
     overflow: hidden;
     border-radius: var(--ims-radius);
     border: 1px dashed var(--bs-border-color);
-    background: #f9fafb;
+    background: var(--ims-surface-soft);
 }
 
 .image-preview img {
@@ -342,7 +382,7 @@ body {
 /* ---------- Dashboard ---------- */
 
 .stat-card-link { transition: box-shadow .15s ease, transform .15s ease; }
-.stat-card-link:hover { box-shadow: 0 4px 12px rgba(16, 24, 40, .08); transform: translateY(-1px); }
+.stat-card-link:hover { box-shadow: var(--ims-shadow-hover); transform: translateY(-1px); }
 
 .chart-box { position: relative; height: 280px; }
 
@@ -362,7 +402,7 @@ body {
 /* ---------- Reports ---------- */
 
 .report-card { transition: box-shadow .15s ease, transform .15s ease; }
-.report-card:hover { box-shadow: 0 4px 12px rgba(16, 24, 40, .08); transform: translateY(-1px); }
+.report-card:hover { box-shadow: var(--ims-shadow-hover); transform: translateY(-1px); }
 .report-table th, .report-table td { white-space: nowrap; }
 .report-table td { max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
 
@@ -376,3 +416,63 @@ body {
 }
 
 .brand-logo-lg { height: 3rem; max-width: 180px; }
+
+/* ---------- Dark theme: classes that Bootstrap keeps light ---------- */
+
+.card .table { --bs-table-bg: transparent; }
+
+[data-bs-theme=dark] .bg-white { background-color: var(--ims-surface) !important; }
+
+[data-bs-theme=dark] .btn-light {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: #2a2a28;
+    --bs-btn-border-color: #2a2a28;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #353533;
+    --bs-btn-hover-border-color: #353533;
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: #3d3d3a;
+    --bs-btn-active-border-color: #3d3d3a;
+    --bs-btn-disabled-color: var(--bs-secondary-color);
+    --bs-btn-disabled-bg: #2a2a28;
+    --bs-btn-disabled-border-color: #2a2a28;
+}
+
+[data-bs-theme=dark] .table-light {
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-bg: #262624;
+    --bs-table-border-color: var(--bs-border-color);
+    --bs-table-striped-bg: #2b2b29;
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-bg: #30302e;
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-bg: #30302e;
+    --bs-table-hover-color: var(--bs-body-color);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+}
+
+[data-bs-theme=dark] .text-bg-light {
+    color: var(--bs-body-color) !important;
+    background-color: #2a2a28 !important;
+}
+
+/* SweetAlert2 confirmation dialogs */
+[data-bs-theme=dark] .swal2-popup {
+    background: var(--ims-surface);
+    color: var(--bs-body-color);
+}
+[data-bs-theme=dark] .swal2-title,
+[data-bs-theme=dark] .swal2-html-container { color: var(--bs-body-color); }
+
+/* ---------- Theme toggle button ---------- */
+
+.theme-toggle-floating {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1030;
+}
+
+/* No colour animation while the page first loads with the saved theme. */
+.theme-switching * { transition: none !important; }
